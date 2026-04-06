@@ -103,6 +103,15 @@ export const BuyerDashboard = () => {
               <span className="text-2xl font-medium tracking-tight" style={{fontFamily: 'Outfit, sans-serif', color: '#1C211F'}}>LandDeal</span>
             </div>
             <div className="flex items-center space-x-4">
+              <Button
+                onClick={() => navigate('/messages')}
+                variant="ghost"
+                className="text-[#2B4A3B] hover:bg-[#E5F0EA] rounded-xl px-4 py-2"
+                data-testid="buyer-messages-button"
+              >
+                <MessageSquare className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                Messages
+              </Button>
               <span className="text-sm text-[#59605D]" style={{fontFamily: 'Manrope, sans-serif'}}>
                 Welcome, {user?.name}
               </span>

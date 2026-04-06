@@ -8,6 +8,7 @@ import { Register } from "./pages/Register";
 import { BuyerDashboard } from "./pages/BuyerDashboard";
 import { SellerDashboard } from "./pages/SellerDashboard";
 import { AdminDashboard } from "./pages/AdminDashboard";
+import { Messages } from "./pages/Messages";
 import { Toaster } from "./components/ui/sonner";
 
 function App() {
@@ -42,6 +43,15 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute allowedRoles={["buyer", "seller"]}>
+                <Messages />
               </ProtectedRoute>
             }
           />
