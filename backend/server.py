@@ -94,7 +94,8 @@ async def get_current_user(request: Request) -> dict:
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
         
-        user["_id"] = str(user["_id"])
+        user["id"] = str(user["_id"])
+        user.pop("_id", None)
         user.pop("password_hash", None)
         return user
     except jwt.ExpiredSignatureError:
