@@ -21,6 +21,10 @@ code {
 }
 
 @layer base {
+    * {
+        @apply border-border;
+    }
+    
     :root {
         --background: 253 251 247;
         --foreground: 28 33 31;
