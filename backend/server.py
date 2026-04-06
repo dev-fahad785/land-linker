@@ -164,6 +164,7 @@ class ListingResponse(BaseModel):
 class MessageCreate(BaseModel):
     listing_id: str
     message: str
+    recipient_id: Optional[str] = None  # For seller replies
 
 class MessageResponse(BaseModel):
     id: str
@@ -555,11 +556,36 @@ async def reject_listing(
 @api_router.post("/messages")
 async def send_message(
     message_data: MessageCreate,
-    user: dict = Depends(require_role(["buyer"]))
+    user: dict = Depends(get_current_user)
 ):
-    listing = await db.listings.find_one({"id": message_data.listing_id, "status": "approved"})
+    listing = await db.listings.find_one({"id": message_data.listing_id})
     if not listing:
         raise HTTPException(status_code=404, detail="Listing not found")
+    
+    # Determine recipient based on user role
+    if user["role"] == "buyer":
+        # Buyer sending to seller
+        if listing["status"] != "approved":
+            raise HTTPException(status_code=404, detail="Listing not found")
+        recipient_id = listing["seller_id"]
+        recipient_name = listing["seller_name"]
+        recipient_email = listing["seller_email"]
+    elif user["role"] == "seller":
+        # Seller replying to buyer
+        if not message_data.recipient_id:
+            raise HTTPException(status_code=400, detail="Recipient ID required for seller replies")
+        if listing["seller_id"] != user["id"]:
+            raise HTTPException(status_code=403, detail="Not authorized to reply to messages about this listing")
+        
+        # Get buyer info
+        buyer = await db.users.find_one({"_id": ObjectId(message_data.recipient_id)})
+        if not buyer:
+            raise HTTPException(status_code=404, detail="Recipient not found")
+        recipient_id = str(buyer["_id"])
+        recipient_name = buyer["name"]
+        recipient_email = buyer["email"]
+    else:
+        raise HTTPException(status_code=403, detail="Only buyers and sellers can send messages")
     
     message_id = str(ObjectId())
     message_doc = {
@@ -569,7 +595,9 @@ async def send_message(
         "sender_id": user["id"],
         "sender_name": user["name"],
         "sender_email": user["email"],
-        "recipient_id": listing["seller_id"],
+        "recipient_id": recipient_id,
+        "recipient_name": recipient_name,
+        "recipient_email": recipient_email,
         "message": message_data.message,
         "created_at": datetime.now(timezone.utc).isoformat()
     }

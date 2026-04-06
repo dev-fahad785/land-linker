@@ -15,6 +15,8 @@ export const Messages = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [groupedMessages, setGroupedMessages] = useState({});
+  const [replyText, setReplyText] = useState({});
+  const [sendingReply, setSendingReply] = useState({});
 
   useEffect(() => {
     fetchMessages();
@@ -35,18 +37,54 @@ export const Messages = () => {
           acc[key] = {
             listing_title: msg.listing_title,
             listing_id: msg.listing_id,
-            messages: []
+            messages: [],
+            participants: new Set()
           };
         }
         acc[key].messages.push(msg);
+        acc[key].participants.add(msg.sender_id);
+        acc[key].participants.add(msg.recipient_id);
         return acc;
       }, {});
+      
+      // Sort messages within each conversation by date
+      Object.values(grouped).forEach(conv => {
+        conv.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      });
       
       setGroupedMessages(grouped);
     } catch (error) {
       toast.error('Failed to fetch messages');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendReply = async (listingId, recipientId) => {
+    const messageText = replyText[listingId]?.trim();
+    if (!messageText) {
+      toast.error('Please enter a message');
+      return;
+    }
+
+    try {
+      setSendingReply({ ...sendingReply, [listingId]: true });
+      await axios.post(
+        `${API_URL}/api/messages`,
+        {
+          listing_id: listingId,
+          recipient_id: recipientId,
+          message: messageText
+        },
+        { withCredentials: true }
+      );
+      toast.success('Reply sent successfully!');
+      setReplyText({ ...replyText, [listingId]: '' });
+      fetchMessages(); // Refresh messages
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to send reply');
+    } finally {
+      setSendingReply({ ...sendingReply, [listingId]: false });
     }
   };
 
@@ -219,6 +257,42 @@ export const Messages = () => {
                       );
                     })}
                   </div>
+                  
+                  {/* Reply form for sellers */}
+                  {user?.role === 'seller' && conversation.messages.length > 0 && (
+                    <div className="mt-6 pt-6 border-t border-[#E8E3D9]">
+                      <h4 className="text-sm font-medium text-[#59605D] mb-3" style={{fontFamily: 'Manrope, sans-serif'}}>
+                        Reply to buyer
+                      </h4>
+                      <div className="flex gap-3">
+                        <textarea
+                          value={replyText[conversation.listing_id] || ''}
+                          onChange={(e) => setReplyText({ ...replyText, [conversation.listing_id]: e.target.value })}
+                          placeholder="Type your reply..."
+                          rows={3}
+                          className="flex-1 bg-white border border-[#D1CBBF] rounded-lg px-4 py-3 focus:border-[#2B4A3B] focus:ring-1 focus:ring-[#2B4A3B] outline-none resize-none"
+                          style={{fontFamily: 'Manrope, sans-serif'}}
+                          data-testid={`reply-textarea-${conversation.listing_id}`}
+                        />
+                      </div>
+                      <div className="flex justify-end mt-3">
+                        <Button
+                          onClick={() => {
+                            // Get the buyer ID from the first message where user is recipient
+                            const buyerMessage = conversation.messages.find(m => m.recipient_id === user?.id);
+                            const buyerId = buyerMessage ? buyerMessage.sender_id : conversation.messages[0].sender_id;
+                            handleSendReply(conversation.listing_id, buyerId);
+                          }}
+                          disabled={sendingReply[conversation.listing_id] || !replyText[conversation.listing_id]?.trim()}
+                          className="bg-[#2B4A3B] text-white hover:bg-[#1E3329] rounded-xl px-6 py-2"
+                          data-testid={`send-reply-button-${conversation.listing_id}`}
+                        >
+                          <MessageSquare className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                          {sendingReply[conversation.listing_id] ? 'Sending...' : 'Send Reply'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             ))}
