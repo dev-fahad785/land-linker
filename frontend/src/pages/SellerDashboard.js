@@ -8,7 +8,7 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent } from '../components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Textarea } from '../components/ui/textarea';
-import { MapPin, LogOut, Plus, Edit, Trash2, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { MapPin, LogOut, Plus, Edit, Trash2, Clock, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
