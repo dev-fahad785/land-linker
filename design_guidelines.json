@@ -1,0 +1,145 @@
+{
+  "theme": {
+    "archetype": "1 (Organic & Earthy)",
+    "mode": "Light",
+    "vibe": "Trust, stability, grounded, premium",
+    "rationale": "For a land dealing platform without brokers, building trust is paramount. Earthy tones (Deep Green, Warm Sand) provide a natural, grounded aesthetic. The UI should avoid the 'crypto-bro' or generic 'SaaS blue' looks, favoring an architectural, clean, and organic presentation."
+  },
+  "typography": {
+    "font_family": {
+      "heading": "Outfit, sans-serif",
+      "body": "Manrope, sans-serif"
+    },
+    "scale": {
+      "h1": "text-5xl lg:text-6xl tracking-tighter leading-none font-medium",
+      "h2": "text-3xl lg:text-4xl tracking-tight leading-tight font-medium",
+      "h3": "text-xl lg:text-2xl tracking-tight leading-snug font-medium",
+      "h4": "text-lg tracking-tight font-medium",
+      "body_large": "text-lg leading-relaxed",
+      "body_base": "text-base leading-relaxed",
+      "body_small": "text-sm leading-normal",
+      "label": "text-xs uppercase tracking-[0.2em] font-bold"
+    },
+    "rules": [
+      "Headings must use tight letter spacing.",
+      "Labels/Overlines must be uppercase with wide tracking.",
+      "No Inter, Roboto, or standard defaults."
+    ]
+  },
+  "colors": {
+    "background": {
+      "main": "#FDFBF7",
+      "surface": "#FFFFFF",
+      "surface_muted": "#F5F3ED"
+    },
+    "border": {
+      "default": "#E8E3D9",
+      "strong": "#D1CBBF"
+    },
+    "text": {
+      "primary": "#1C211F",
+      "secondary": "#59605D",
+      "tertiary": "#8A918E",
+      "inverse": "#FDFBF7"
+    },
+    "brand": {
+      "primary": "#2B4A3B",
+      "primary_hover": "#1E3329",
+      "accent": "#C77963",
+      "accent_hover": "#A8614E"
+    },
+    "semantics": {
+      "success": "#3D684E",
+      "success_bg": "#E5F0EA",
+      "warning": "#D9944B",
+      "warning_bg": "#FDF2E3",
+      "error": "#B04A41",
+      "error_bg": "#FBEAE8"
+    }
+  },
+  "spacing_and_layout": {
+    "philosophy": "Generous Spacing Philosophy",
+    "containers": "Padding must be generous. Cards: p-6 or p-8. Sections: py-24 or py-32.",
+    "grids": {
+      "marketing": "grid-cols-1 md:grid-cols-12 gap-8. Asymmetric span logic.",
+      "dashboard": "grid-cols-1 md:grid-cols-12 gap-6. Dense 'Control Room' style layout."
+    },
+    "borders_and_radius": {
+      "radius_large": "rounded-2xl",
+      "radius_medium": "rounded-xl",
+      "radius_small": "rounded-lg",
+      "card_style": "1px solid border (#E8E3D9) with subtle shadow-sm. No muddy heavy drop shadows."
+    }
+  },
+  "components": {
+    "navigation": {
+      "style": "Crystal Glass or Solid Muted Surface",
+      "classes": "sticky top-0 z-50 backdrop-blur-xl bg-[#FDFBF7]/80 border-b border-[#E8E3D9]"
+    },
+    "buttons": {
+      "primary": "bg-[#2B4A3B] text-white hover:bg-[#1E3329] rounded-xl px-6 py-3 transition-colors duration-200 font-medium",
+      "secondary": "bg-[#F5F3ED] text-[#1C211F] hover:bg-[#E8E3D9] rounded-xl px-6 py-3 transition-colors duration-200 font-medium",
+      "outline": "border border-[#D1CBBF] text-[#1C211F] hover:bg-[#F5F3ED] rounded-xl px-6 py-3 transition-colors duration-200 font-medium"
+    },
+    "cards": {
+      "property": "bg-white border border-[#E8E3D9] rounded-2xl overflow-hidden hover:shadow-md transition-shadow duration-300",
+      "dashboard_widget": "bg-white border border-[#E8E3D9] rounded-xl p-6"
+    },
+    "forms": {
+      "input": "bg-white border border-[#D1CBBF] rounded-lg px-4 py-3 focus:border-[#2B4A3B] focus:ring-1 focus:ring-[#2B4A3B] outline-none transition-all",
+      "label": "text-sm font-medium text-[#59605D] mb-1.5 block"
+    }
+  },
+  "motion": {
+    "hover": "Subtle translate-y-[-2px] for property cards with shadow elevation.",
+    "transitions": "transition-all duration-300 ease-out",
+    "page_load": "Fade in and slide up (translate-y-4) for main content blocks."
+  },
+  "image_urls": [
+    {
+      "category": "hero_background",
+      "url": "https://images.unsplash.com/photo-1698154050505-1c8a63425130?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHw0fHxlbXB0eSUyMGdyZWVuJTIwbGFuZCUyMGxhbmRzY2FwZXxlbnwwfHx8fDE3NzU0ODg3NDd8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Grassy hill with trees, vast open land. Perfect for hero overlay with bg-white/40 glassmorphism box."
+    },
+    {
+      "category": "texture_overlay",
+      "url": "https://images.unsplash.com/photo-1758537582304-f90cd3109e2b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwyfHxhYnN0cmFjdCUyMGVhcnRoeSUyMHRleHR1cmUlMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc3NTQ4ODc0N3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Textured background for a subtle noise effect in dark footers or premium sections."
+    },
+    {
+      "category": "property_listing_1",
+      "url": "https://images.unsplash.com/photo-1712984790749-f43e968f54cc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxNzV8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwYXJjaGl0ZWN0dXJlJTIwaG91c2UlMjBuYXR1cmV8ZW58MHx8fHwxNzc1NDg4NzQ3fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Large white house with tree - minimalist premium property."
+    },
+    {
+      "category": "property_listing_2",
+      "url": "https://images.unsplash.com/photo-1748896287220-50025da5e9b6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxNzV8MHwxfHNlYXJjaHwzfHxtaW5pbWFsaXN0JTIwYXJjaGl0ZWN0dXJlJTIwaG91c2UlMjBuYXR1cmV8ZW58MHx8fHwxNzc1NDg4NzQ3fDA&ixlib=rb-4.1.0&q=85",
+      "description": "Small house atop a grassy hill - remote land."
+    },
+    {
+      "category": "property_listing_3",
+      "url": "https://images.unsplash.com/photo-1762342843162-929a0e96a853?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHwzfHxlbXB0eSUyMGdyZWVuJTIwbGFuZCUyMGxhbmRzY2FwZXxlbnwwfHx8fDE3NzU0ODg3NDd8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Calm lake water reflecting pastel sky over land - waterfront plot."
+    }
+  ],
+  "icons": {
+    "library": "lucide-react",
+    "stroke_width": "1.5",
+    "rationale": "Lucide matches the clean, architectural aesthetic of the platform."
+  },
+  "testing": {
+    "attribute": "data-testid",
+    "convention": "kebab-case, role-based",
+    "examples": ["login-submit-button", "property-card-123", "admin-approve-listing"]
+  },
+  "instructions_to_main_agent": [
+    "Do NOT use 'Inter', 'Roboto', or 'Open Sans'. Load 'Outfit' (weights 300, 400, 500, 600) for headings and 'Manrope' (weights 400, 500) for body text via Google Fonts.",
+    "Implement the UI using React, Tailwind CSS, and Shadcn UI. Modify Shadcn defaults to match the rounded-xl and earthy border colors specified.",
+    "For the Hero section, use the 'hero_background' image with a glassmorphic card for the search/CTA area to ensure text readability.",
+    "Dashboards (Admin/Buyer/Seller) must have a sidebar layout (w-64) with a top header. Ensure active state in sidebar uses the primary brand color (#2B4A3B) background with white text.",
+    "Property listing cards should display a fixed aspect ratio image (e.g., aspect-[4/3]), clean typography for price, and tiny labels for location/size.",
+    "Data grids (Admin panel) should use flat design: border-collapse, subtle horizontal borders, no excessive card shadows.",
+    "All forms (registration, add listing) must use Shadcn form elements with custom padding/borders to look premium and touch-friendly.",
+    "Include 'data-testid' on all interactive elements as required by the testing guidelines."
+  ]
+}
