@@ -27,22 +27,34 @@ export default function LoginPage() {
         redirect: false,
       });
 
-      if (result?.error) {
-        toast.error(result.error);
-      } else {
-        // Fetch user info to redirect to correct dashboard
-        const response = await fetch("/api/auth/session");
-        const session = await response.json();
-        
-        if (session?.user?.role === "admin") {
-          router.push("/admin");
-        } else if (session?.user?.role === "seller") {
-          router.push("/seller");
-        } else {
-          router.push("/buyer");
-        }
-        router.refresh();
+      if (!result) {
+        toast.error("No response from auth server. Please try again.");
+        return;
       }
+
+      if (result.error || !result.ok) {
+        toast.error(result.error || "Login failed. Please check your credentials.");
+        return;
+      }
+
+      // Confirm authenticated session before redirecting.
+      const response = await fetch("/api/auth/session", { cache: "no-store" });
+      const session = await response.json().catch(() => ({}));
+
+      if (!session?.user?.role) {
+        toast.error("Login did not complete. Verify AUTH_SECRET and MONGODB_URI in deployment environment.");
+        return;
+      }
+
+      if (session.user.role === "admin") {
+        router.push("/admin");
+      } else if (session.user.role === "seller") {
+        router.push("/seller");
+      } else {
+        router.push("/buyer");
+      }
+
+      router.refresh();
     } catch {
       toast.error("An error occurred during login");
     } finally {
