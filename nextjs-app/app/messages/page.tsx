@@ -21,8 +21,13 @@ type MessageItem = {
 };
 
 type GroupedConversation = {
+  threadKey: string;
   listingId: string;
   listingTitle: string;
+  partnerId: string;
+  partnerName: string;
+  partnerEmail: string;
+  lastMessage: MessageItem;
   messages: MessageItem[];
 };
 
@@ -32,13 +37,13 @@ export default function MessagesPage() {
 
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [replyText, setReplyText] = useState<Record<string, string>>({});
-  const [sending, setSending] = useState<Record<string, boolean>>({});
+  const [selectedThreadKey, setSelectedThreadKey] = useState("");
+  const [composerText, setComposerText] = useState("");
+  const [sendingComposer, setSendingComposer] = useState(false);
 
   const outlineButton = "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium border border-[#D1CBBF] hover:bg-[#F5F3ED]";
   const dangerButton = "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium border border-[#B04A41] text-[#B04A41] hover:bg-[#FBEAE8]";
   const primaryButton = "inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium text-white bg-[#2B4A3B] hover:bg-[#1E3329]";
-  const cardClass = "rounded-xl border border-[#E8E3D9] bg-white shadow-sm";
   const inputClass = "w-full rounded-md border border-[#D1CBBF] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2B4A3B]/30";
 
   useEffect(() => {
@@ -49,16 +54,34 @@ export default function MessagesPage() {
 
   const conversations = useMemo<GroupedConversation[]>(() => {
     const grouped = new Map<string, GroupedConversation>();
+    const currentUserId = session?.user?.id;
 
     for (const item of messages) {
-      if (!grouped.has(item.listing_id)) {
-        grouped.set(item.listing_id, {
+      const participants = [item.sender_id, item.recipient_id].sort().join(":");
+      const threadKey = `${item.listing_id}:${participants}`;
+      const isCurrentUserSender = item.sender_id === currentUserId;
+
+      if (!grouped.has(threadKey)) {
+        grouped.set(threadKey, {
+          threadKey,
           listingId: item.listing_id,
           listingTitle: item.listing_title,
+          partnerId: isCurrentUserSender ? item.recipient_id : item.sender_id,
+          partnerName: isCurrentUserSender ? item.recipient_name || item.recipient_email || "Contact" : item.sender_name,
+          partnerEmail: isCurrentUserSender ? item.recipient_email || "" : item.sender_email,
+          lastMessage: item,
           messages: [],
         });
       }
-      grouped.get(item.listing_id)!.messages.push(item);
+
+      const conversation = grouped.get(threadKey)!;
+      conversation.messages.push(item);
+      if (new Date(item.created_at).getTime() >= new Date(conversation.lastMessage.created_at).getTime()) {
+        conversation.lastMessage = item;
+        conversation.partnerId = isCurrentUserSender ? item.recipient_id : item.sender_id;
+        conversation.partnerName = isCurrentUserSender ? item.recipient_name || item.recipient_email || "Contact" : item.sender_name;
+        conversation.partnerEmail = isCurrentUserSender ? item.recipient_email || "" : item.sender_email;
+      }
     }
 
     for (const item of grouped.values()) {
@@ -66,11 +89,25 @@ export default function MessagesPage() {
     }
 
     return Array.from(grouped.values()).sort((a, b) => {
-      const lastA = a.messages[a.messages.length - 1];
-      const lastB = b.messages[b.messages.length - 1];
-      return new Date(lastB.created_at).getTime() - new Date(lastA.created_at).getTime();
+      return new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime();
     });
-  }, [messages]);
+  }, [messages, session?.user?.id]);
+
+  useEffect(() => {
+    if (conversations.length === 0) {
+      setSelectedThreadKey("");
+      return;
+    }
+
+    if (!selectedThreadKey || !conversations.some((conversation) => conversation.threadKey === selectedThreadKey)) {
+      setSelectedThreadKey(conversations[0].threadKey);
+    }
+  }, [conversations, selectedThreadKey]);
+
+  const selectedConversation = useMemo(
+    () => conversations.find((conversation) => conversation.threadKey === selectedThreadKey) || conversations[0] || null,
+    [conversations, selectedThreadKey]
+  );
 
   function formatTime(value: string): string {
     const date = new Date(value);
@@ -94,37 +131,6 @@ export default function MessagesPage() {
     }
   }
 
-  async function sendSellerReply(listingId: string, recipientId: string) {
-    const text = (replyText[listingId] || "").trim();
-    if (!text) {
-      toast.error("Please enter a message");
-      return;
-    }
-
-    try {
-      setSending((prev) => ({ ...prev, [listingId]: true }));
-
-      const response = await fetch("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ listing_id: listingId, recipient_id: recipientId, message: text }),
-      });
-
-      const data = (await response.json().catch(() => ({}))) as { error?: string };
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to send reply");
-      }
-
-      toast.success("Reply sent");
-      setReplyText((prev) => ({ ...prev, [listingId]: "" }));
-      await fetchMessages();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to send reply");
-    } finally {
-      setSending((prev) => ({ ...prev, [listingId]: false }));
-    }
-  }
-
   if (status === "loading") {
     return <div className="min-h-screen bg-[#FDFBF7] grid place-items-center text-[#59605D]">Loading messages...</div>;
   }
@@ -135,6 +141,12 @@ export default function MessagesPage() {
   }
 
   const role = session?.user?.role;
+  const activeConversation = selectedConversation;
+  const canCompose = Boolean(activeConversation);
+  const composerRecipientId = activeConversation?.partnerId || "";
+  const composerListingId = activeConversation?.listingId || "";
+  const composerTitle = activeConversation?.partnerName || "No contact selected";
+  const composerSubtitle = activeConversation?.listingTitle || "Choose a contact from the left panel";
 
   return (
     <div className="min-h-screen bg-[#FDFBF7]">
@@ -153,64 +165,163 @@ export default function MessagesPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {loading ? (
-          <div className="text-[#59605D] text-center py-8">Loading conversations...</div>
-        ) : conversations.length === 0 ? (
-          <section className={cardClass}><div className="py-8 text-center text-[#59605D]">No conversations yet.</div></section>
-        ) : (
-          <div className="space-y-4">
-            {conversations.map((conversation) => {
-              const recipientForSeller =
-                role === "seller"
-                  ? conversation.messages.find((item) => item.sender_id !== session?.user?.id)
-                  : null;
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        <div className="grid min-h-[calc(100vh-10rem)] grid-cols-1 lg:grid-cols-[360px_minmax(0,1fr)] gap-6">
+          <aside className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[#E8E3D9] bg-white shadow-sm">
+            <div className="border-b border-[#E8E3D9] px-4 py-3">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#59605D]">Recent contacts</p>
+            </div>
 
-              return (
-                <section key={conversation.listingId} className={cardClass}>
-                  <div className="p-4 border-b border-[#E8E3D9]"><h2 className="font-semibold text-lg">{conversation.listingTitle}</h2></div>
-                  <div className="p-4 space-y-3">
-                    {conversation.messages.map((item) => {
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              {loading ? (
+                <div className="p-4 text-sm text-[#59605D]">Loading conversations...</div>
+              ) : conversations.length === 0 ? (
+                <div className="p-4 text-sm text-[#59605D]">
+                  No conversations yet. {role === "buyer" ? "Start from a property contact button." : "Wait for a buyer to message you."}
+                </div>
+              ) : (
+                <div className="divide-y divide-[#E8E3D9]">
+                  {conversations.map((conversation) => {
+                    const active = conversation.threadKey === activeConversation?.threadKey;
+
+                    return (
+                      <button
+                        key={conversation.threadKey}
+                        type="button"
+                        data-testid={`conversation-${conversation.threadKey}`}
+                        className={`w-full text-left p-4 transition-colors ${active ? "bg-[#F5F3ED]" : "hover:bg-[#F9F8F4]"}`}
+                        onClick={() => setSelectedThreadKey(conversation.threadKey)}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-[#1C211F]">{conversation.partnerName}</p>
+                            <p className="truncate text-xs text-[#59605D]">{conversation.listingTitle}</p>
+                          </div>
+                          <span className="shrink-0 text-[11px] text-[#8A918E]">{formatTime(conversation.lastMessage.created_at)}</span>
+                        </div>
+                        <p className="mt-2 line-clamp-2 text-sm text-[#59605D]">{conversation.lastMessage.message}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+          </aside>
+
+          <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[#E8E3D9] bg-white shadow-sm">
+            {activeConversation ? (
+              <>
+                <div className="border-b border-[#E8E3D9] px-5 py-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <h2 className="truncate text-xl font-outfit font-medium text-[#1C211F]">{composerTitle}</h2>
+                      <p className="truncate text-sm text-[#59605D]">{composerSubtitle}</p>
+                      <p className="truncate text-xs text-[#8A918E]">{activeConversation.partnerEmail || ""}</p>
+                    </div>
+                    <div className="rounded-full bg-[#E5F0EA] px-3 py-1 text-xs font-medium text-[#2B4A3B]">
+                      {activeConversation.messages.length} messages
+                    </div>
+                  </div>
+                </div>
+
+                <div className="min-h-0 flex-1 overflow-y-auto bg-[linear-gradient(180deg,#fcfbf8_0%,#fdfbf7_100%)] p-5">
+                  <div className="space-y-3">
+                    {activeConversation.messages.map((item) => {
                       const mine = item.sender_id === session?.user?.id;
                       return (
-                        <div key={item.id} className={`rounded-lg p-3 ${mine ? "bg-[#E5F0EA]" : "bg-white border border-[#E8E3D9]"}`}>
-                          <p className="text-sm text-[#1C211F]">{item.message}</p>
-                          <p className="text-xs text-[#59605D] mt-1">
-                            {item.sender_name} ({item.sender_email}) • {formatTime(item.created_at)}
-                          </p>
+                        <div key={item.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                          <div className={`max-w-[82%] rounded-2xl px-4 py-3 shadow-sm ${mine ? "bg-[#DCE9E0] text-[#1C211F]" : "bg-white border border-[#E8E3D9] text-[#1C211F]"}`}>
+                            <p className="whitespace-pre-wrap text-sm leading-relaxed">{item.message}</p>
+                            <p className="mt-2 text-[11px] text-[#59605D]">
+                              {mine ? "You" : item.sender_name} • {formatTime(item.created_at)}
+                            </p>
+                          </div>
                         </div>
                       );
                     })}
-
-                    {role === "seller" && recipientForSeller && (
-                      <div className="pt-2 border-t border-[#E8E3D9] space-y-2">
-                        <textarea
-                          rows={3}
-                          className={inputClass}
-                          placeholder="Reply to buyer"
-                          value={replyText[conversation.listingId] || ""}
-                          onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
-                            setReplyText((prev) => ({ ...prev, [conversation.listingId]: event.target.value }))
-                          }
-                        />
-                        <div className="flex justify-end">
-                          <button
-                            type="button"
-                            className={primaryButton}
-                            disabled={sending[conversation.listingId]}
-                            onClick={() => sendSellerReply(conversation.listingId, recipientForSeller.sender_id)}
-                          >
-                            {sending[conversation.listingId] ? "Sending..." : "Send Reply"}
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
-                </section>
-              );
-            })}
-          </div>
-        )}
+                </div>
+
+                {canCompose ? (
+                  <div className="border-t border-[#E8E3D9] bg-white p-4">
+                    <form
+                      className="flex items-end gap-3"
+                      onSubmit={async (event) => {
+                        event.preventDefault();
+                        const text = composerText.trim();
+                        if (!text) {
+                          toast.error("Please enter a message");
+                          return;
+                        }
+
+                        if (!composerListingId || !composerRecipientId) {
+                          toast.error("Please select a contact");
+                          return;
+                        }
+
+                        try {
+                          setSendingComposer(true);
+
+                          const response = await fetch("/api/messages", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              listing_id: composerListingId,
+                              recipient_id: composerRecipientId,
+                              message: text,
+                            }),
+                          });
+
+                          const data = (await response.json().catch(() => ({}))) as { error?: string };
+                          if (!response.ok) {
+                            throw new Error(data.error || "Failed to send message");
+                          }
+
+                          toast.success("Message sent");
+                          setComposerText("");
+                          await fetchMessages();
+                        } catch (error) {
+                          toast.error(error instanceof Error ? error.message : "Failed to send message");
+                        } finally {
+                          setSendingComposer(false);
+                        }
+                      }}
+                    >
+                      <textarea
+                        rows={2}
+                        className={`${inputClass} flex-1 resize-none`}
+                        placeholder={canCompose ? `Message ${composerTitle}` : "Select a contact first"}
+                        value={composerText}
+                        onChange={(event: ChangeEvent<HTMLTextAreaElement>) => setComposerText(event.target.value)}
+                      />
+                      <button
+                        type="submit"
+                        data-testid="message-reply-send-button"
+                        className={primaryButton}
+                        disabled={sendingComposer}
+                      >
+                        {sendingComposer ? "Sending..." : "Send"}
+                      </button>
+                    </form>
+                  </div>
+                ) : null}
+              </>
+            ) : (
+              <div className="grid h-full place-items-center p-8 text-center">
+                <div className="max-w-md">
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#E5F0EA] text-[#2B4A3B]">
+                    <span className="text-xl">*</span>
+                  </div>
+                  <h2 className="text-2xl font-outfit font-medium text-[#1C211F]">No conversation selected</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-[#59605D]">
+                    Pick a recent contact from the left panel to continue chatting.
+                  </p>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
       </main>
     </div>
   );
