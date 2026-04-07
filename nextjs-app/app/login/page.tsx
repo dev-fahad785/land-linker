@@ -21,11 +21,15 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      console.log("🔐 Starting login flow with email:", email);
+      
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
+
+      console.log("🔐 SignIn result:", result);
 
       if (!result) {
         toast.error("No response from auth server. Please try again.");
@@ -33,29 +37,46 @@ export default function LoginPage() {
       }
 
       if (result.error || !result.ok) {
+        console.error("❌ SignIn error:", result.error);
         toast.error(result.error || "Login failed. Please check your credentials.");
         return;
       }
 
+      console.log("✅ SignIn successful");
+
       // Confirm authenticated session before redirecting.
       const response = await fetch("/api/auth/session", { cache: "no-store" });
-      const session = await response.json().catch(() => ({}));
+      console.log("Session response status:", response.status);
+      
+      const session = await response.json().catch(() => {
+        console.error("❌ Failed to parse session JSON");
+        return {};
+      });
+
+      console.log("📋 Session data:", session);
 
       if (!session?.user?.role) {
+        console.error("❌ No role in session. Full session:", JSON.stringify(session));
         toast.error("Login did not complete. Verify AUTH_SECRET and MONGODB_URI in deployment environment.");
         return;
       }
 
+      console.log("✅ Session valid with role:", session.user.role);
+
       if (session.user.role === "admin") {
+        console.log("👤 Routing to admin...");
         router.push("/admin");
       } else if (session.user.role === "seller") {
+        console.log("👤 Routing to seller...");
         router.push("/seller");
       } else {
+        console.log("👤 Routing to buyer...");
         router.push("/buyer");
       }
 
       router.refresh();
-    } catch {
+    } catch (error) {
+      console.error("❌ Unexpected error:", error);
       toast.error("An error occurred during login");
     } finally {
       setLoading(false);
