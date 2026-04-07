@@ -16,22 +16,24 @@ export async function GET(request: NextRequest) {
     const minSize = searchParams.get('min_size');
     const maxSize = searchParams.get('max_size');
 
-    const query: any = { status: 'approved' };
+    const query: Record<string, unknown> = { status: 'approved' };
 
     if (city) {
       query.city = { $regex: city, $options: 'i' };
     }
     
     if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = parseFloat(minPrice);
-      if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+      const priceQuery: { $gte?: number; $lte?: number } = {};
+      if (minPrice) priceQuery.$gte = parseFloat(minPrice);
+      if (maxPrice) priceQuery.$lte = parseFloat(maxPrice);
+      query.price = priceQuery;
     }
     
     if (minSize || maxSize) {
-      query.landSize = {};
-      if (minSize) query.landSize.$gte = parseFloat(minSize);
-      if (maxSize) query.landSize.$lte = parseFloat(maxSize);
+      const sizeQuery: { $gte?: number; $lte?: number } = {};
+      if (minSize) sizeQuery.$gte = parseFloat(minSize);
+      if (maxSize) sizeQuery.$lte = parseFloat(maxSize);
+      query.landSize = sizeQuery;
     }
 
     const listings = await Listing.find(query).sort({ createdAt: -1 }).lean();

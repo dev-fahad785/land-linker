@@ -112,7 +112,7 @@ export default function Home() {
                 Smart Search
               </h3>
               <p className="text-base leading-relaxed text-[#59605D]">
-                Filter by location, price range, and land size to find exactly what you're looking for in seconds.
+                Filter by location, price range, and land size to find exactly what you are looking for in seconds.
               </p>
             </div>
           </div>

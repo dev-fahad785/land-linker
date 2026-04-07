@@ -68,7 +68,7 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
     
     if (body.title) updates.title = body.title;
     if (body.description) updates.description = body.description;

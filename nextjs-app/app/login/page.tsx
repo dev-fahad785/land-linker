@@ -43,7 +43,7 @@ export default function LoginPage() {
         }
         router.refresh();
       }
-    } catch (error) {
+    } catch {
       toast.error("An error occurred during login");
     } finally {
       setLoading(false);
@@ -51,64 +51,64 @@ export default function LoginPage() {
   };
 
   return (
-    <div className=\"min-h-screen bg-[#FDFBF7] flex items-center justify-center px-4 py-12\">
-      <Card className=\"w-full max-w-md border-[#E8E3D9] shadow-sm\">
-        <CardHeader className=\"space-y-2\">
-          <CardTitle className=\"text-3xl font-medium tracking-tight font-outfit text-[#1C211F]\">
+    <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center px-4 py-12">
+      <Card className="w-full max-w-md border-[#E8E3D9] shadow-sm">
+        <CardHeader className="space-y-2">
+          <CardTitle className="text-3xl font-medium tracking-tight font-outfit text-[#1C211F]">
             Welcome Back
           </CardTitle>
-          <CardDescription className=\"text-[#59605D]\">
+          <CardDescription className="text-[#59605D]">
             Sign in to your account to continue
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className=\"space-y-4\">
-            <div className=\"space-y-2\">
-              <Label htmlFor=\"email\" className=\"text-sm font-medium text-[#59605D]\">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium text-[#59605D]">
                 Email
               </Label>
               <Input
-                id=\"email\"
-                type=\"email\"
+                id="email"
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className=\"bg-white border-[#D1CBBF] rounded-lg focus:border-[#2B4A3B] focus:ring-1 focus:ring-[#2B4A3B]\"
+                className="bg-white border-[#D1CBBF] rounded-lg focus:border-[#2B4A3B] focus:ring-1 focus:ring-[#2B4A3B]"
               />
             </div>
 
-            <div className=\"space-y-2\">
-              <Label htmlFor=\"password\" className=\"text-sm font-medium text-[#59605D]\">
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium text-[#59605D]">
                 Password
               </Label>
               <Input
-                id=\"password\"
-                type=\"password\"
+                id="password"
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className=\"bg-white border-[#D1CBBF] rounded-lg focus:border-[#2B4A3B] focus:ring-1 focus:ring-[#2B4A3B]\"
+                className="bg-white border-[#D1CBBF] rounded-lg focus:border-[#2B4A3B] focus:ring-1 focus:ring-[#2B4A3B]"
               />
             </div>
 
             <Button
-              type=\"submit\"
+              type="submit"
               disabled={loading}
-              className=\"w-full bg-[#2B4A3B] text-white hover:bg-[#1E3329] rounded-xl px-6 py-3 font-medium\"
+              className="w-full bg-[#2B4A3B] text-white hover:bg-[#1E3329] rounded-xl px-6 py-3 font-medium"
             >
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 
-          <div className=\"mt-6 text-center text-sm text-[#59605D]\">
-            Don't have an account?{" "}
-            <Link href=\"/register\" className=\"text-[#2B4A3B] font-medium hover:text-[#1E3329]\">
+          <div className="mt-6 text-center text-sm text-[#59605D]">
+            Do not have an account?{" "}
+            <Link href="/register" className="text-[#2B4A3B] font-medium hover:text-[#1E3329]">
               Sign up
             </Link>
           </div>
 
-          <div className=\"mt-4 text-center\">
-            <Link href=\"/\" className=\"text-sm text-[#8A918E] hover:text-[#59605D]\">
+          <div className="mt-4 text-center">
+            <Link href="/" className="text-sm text-[#8A918E] hover:text-[#59605D]">
               Back to Home
             </Link>
           </div>

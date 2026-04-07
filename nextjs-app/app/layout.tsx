@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
   title: "LandDeal - Buy and Sell Land Directly",
@@ -15,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-manrope">
-        {children}
+        <Providers>{children}</Providers>
         <Toaster position="top-right" />
       </body>
     </html>

@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import dbConnect from "@/lib/mongodb";
 import { Listing } from "@/models/Listing";
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await auth();
     if (!session || session.user.role !== 'seller') {
