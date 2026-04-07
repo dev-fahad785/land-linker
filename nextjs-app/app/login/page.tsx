@@ -63,18 +63,21 @@ export default function LoginPage() {
 
       console.log("✅ Session valid with role:", session.user.role);
 
+      // Determine redirect path
+      let redirectPath = "/buyer";
       if (session.user.role === "admin") {
+        redirectPath = "/admin";
         console.log("👤 Routing to admin...");
-        router.push("/admin");
       } else if (session.user.role === "seller") {
+        redirectPath = "/seller";
         console.log("👤 Routing to seller...");
-        router.push("/seller");
       } else {
         console.log("👤 Routing to buyer...");
-        router.push("/buyer");
       }
 
-      router.refresh();
+      console.log("🚀 Navigating to:", redirectPath);
+      // Use window.location for guaranteed navigation
+      window.location.href = redirectPath;
     } catch (error) {
       console.error("❌ Unexpected error:", error);
       toast.error("An error occurred during login");
