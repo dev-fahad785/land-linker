@@ -1,6 +1,9 @@
+import { loadEnvConfig } from "@next/env";
 import dbConnect from "../lib/mongodb";
 import { User } from "../models/User";
 import bcrypt from "bcryptjs";
+
+loadEnvConfig(process.cwd());
 
 async function seedAdmin() {
   try {
