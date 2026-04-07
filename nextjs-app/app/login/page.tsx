@@ -76,8 +76,11 @@ export default function LoginPage() {
       }
 
       console.log("🚀 Navigating to:", redirectPath);
-      // Use window.location for guaranteed navigation
-      window.location.href = redirectPath;
+      
+      // Small delay to ensure cookie is fully set, then navigate with absolute URL
+      setTimeout(() => {
+        window.location.href = new URL(redirectPath, window.location.origin).toString();
+      }, 100);
     } catch (error) {
       console.error("❌ Unexpected error:", error);
       toast.error("An error occurred during login");
