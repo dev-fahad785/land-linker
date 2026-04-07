@@ -226,7 +226,7 @@ export default function BuyerPage() {
             {listings.map((listing) => (
               <section key={listing.id} className={cardClass}>
                 <div className="p-5 space-y-3">
-                  <div className="aspect-[16/10] rounded-lg overflow-hidden bg-[#F5F3ED]">
+                  <div className="aspect-16/10 rounded-lg overflow-hidden bg-[#F5F3ED]">
                     <img
                       src={listing.images[0] || "https://images.unsplash.com/photo-1698154050505-1c8a63425130?auto=format&fit=crop&w=1200&q=80"}
                       alt={listing.title}
@@ -240,9 +240,16 @@ export default function BuyerPage() {
                     <p className="text-[#2B4A3B] font-semibold">${listing.price.toLocaleString()}</p>
                     <p className="text-sm text-[#59605D]">{listing.land_size} acres</p>
                   </div>
-                  <button type="button" className={`${primaryButton} w-full`} onClick={() => setSelectedListing(listing)}>
-                    Contact Seller
-                  </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Link href={`/listings/${listing.id}`}>
+                      <button type="button" className={`${outlineButton} w-full`}>
+                        View Details
+                      </button>
+                    </Link>
+                    <button type="button" className={`${primaryButton} w-full`} onClick={() => setSelectedListing(listing)}>
+                      Contact Seller
+                    </button>
+                  </div>
                 </div>
               </section>
             ))}
